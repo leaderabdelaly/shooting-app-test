@@ -1,22 +1,8 @@
 {
   "ar": {
-    "title": "Shehaby Shooting Pro",
-    "analyze": "بدء تحليل الأخطاء",
-    "setCenter": "تحديد مركز الهدف",
-    "free": "نسخة مجانية – 10 طلقات فقط",
-    "pro": "نسخة احترافية مفعلة",
-    "activate": "تفعيل النسخة الاحترافية",
-    "noData": "حدد المركز والطلقات أولا",
-    "upgrade": "الترقية لعرض طريقة العلاج"
+    "title": "Shehaby Shooting Pro"
   },
   "en": {
-    "title": "Shehaby Shooting Pro",
-    "analyze": "Analyze Errors",
-    "setCenter": "Set Target Center",
-    "free": "Free version – 10 shots only",
-    "pro": "Pro version activated",
-    "activate": "Activate Pro",
-    "noData": "Please set center and shots first",
-    "upgrade": "Upgrade to see treatment"
+    "title": "Shehaby Shooting Pro"
   }
 }
