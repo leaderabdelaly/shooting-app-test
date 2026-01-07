@@ -13,7 +13,6 @@
 
 <header>
   <h1>Shehaby Shooting Pro</h1>
-
   <div class="top-controls">
     <button id="langToggle">EN</button>
     <button onclick="openProModal()">⭐ النسخة الاحترافية</button>
@@ -44,26 +43,26 @@
     <h2>🔒 النسخة الاحترافية</h2>
 
     <p>
-      النسخة المجانية<br>
-      - 10 طلقات فقط<br>
-      - تحليل الخطأ بدون علاج
+      ✔ غير محدود<br>
+      ✔ علاج الأخطاء<br>
+      ✔ شهر أو سنة
     </p>
 
-    <p>
-      النسخة الاحترافية<br>
-      - عدد غير محدود<br>
-      - تحليل + علاج<br>
-      - حفظ الجلسات
-    </p>
+    <select id="planSelect">
+      <option value="30">اشتراك شهري</option>
+      <option value="365">اشتراك سنوي</option>
+    </select>
 
     <input id="licenseInput" placeholder="ادخل كود التفعيل">
 
-    <button onclick="submitLicenseCode()">تفعيل</button>
+    <button onclick="submitLicense()">تفعيل النسخة</button>
     <button class="secondary" onclick="closeProModal()">إغلاق</button>
 
     <p class="small">
       <a id="whatsLink" target="_blank">طلب كود التفعيل عبر واتساب</a>
     </p>
+
+    <p id="licenseInfo" class="small"></p>
   </div>
 </div>
 
