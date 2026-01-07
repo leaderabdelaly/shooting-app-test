@@ -1,22 +1,12 @@
-﻿const LICENSE_KEY = "shehaby_license";
-const MASTER_KEY = "SHEHABY-PRO-2026";
+let isPro = localStorage.getItem("shehaby_pro") === "true";
 
-function isProUser() {
-  return localStorage.getItem(LICENSE_KEY) === "PRO";
-}
+function activateProLicense(code) {
+  const MASTER = "SHEHABY-PRO-999";
 
-function activatePro(key) {
-  if (key === MASTER_KEY) {
-    localStorage.setItem(LICENSE_KEY, "PRO");
+  if (code === MASTER) {
+    localStorage.setItem("shehaby_pro", "true");
     return true;
   }
+
   return false;
-}
-
-function canAddShot(count) {
-  return isProUser() || count < 10;
-}
-
-function canShowTreatment() {
-  return isProUser();
 }
