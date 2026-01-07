@@ -7,17 +7,16 @@ let shots = [];
 let mode = null;
 
 document.getElementById("imageInput").onchange = e => {
-  const file = e.target.files[0];
-  img.src = URL.createObjectURL(file);
+  img.src = URL.createObjectURL(e.target.files[0]);
 };
 
 img.onload = () => {
   canvas.width = img.width;
   canvas.height = img.height;
-  redraw();
+  draw();
 };
 
-function redraw() {
+function draw() {
   ctx.clearRect(0,0,canvas.width,canvas.height);
   ctx.drawImage(img,0,0);
 
@@ -44,13 +43,13 @@ canvas.onclick = e => {
 
   if (mode === "center") center = {x,y};
   if (mode === "shot") {
-    if (!isPro && shots.length >= 10) {
+    if (!canAddShot(shots.length)) {
       alert("النسخة المجانية 10 طلقات فقط");
       return;
     }
     shots.push({x,y});
   }
-  redraw();
+  draw();
 };
 
 function setCenterMode() { mode = "center"; }
@@ -59,7 +58,7 @@ function shotMode() { mode = "shot"; }
 function analyzeShots() {
   if (!center || shots.length === 0) return;
 
-  let result = {};
+  let errors = {};
   shots.forEach(s=>{
     const dx = s.x - center.x;
     const dy = s.y - center.y;
@@ -69,16 +68,16 @@ function analyzeShots() {
       dx < -20 ? "يسار" :
       dx > 20 ? "يمين" :
       "مركز";
-    result[key] = (result[key]||0)+1;
+    errors[key] = (errors[key] || 0) + 1;
   });
 
-  let max = Object.keys(result).reduce((a,b)=>result[a]>result[b]?a:b);
+  const main = Object.keys(errors).reduce((a,b)=>errors[a]>errors[b]?a:b);
   document.getElementById("result").innerText =
-    "الخطأ الغالب: " + max +
-    (isPro ? "\nالعلاج: راجع قبضة السلاح والتنفس" : "");
+    "الخطأ الغالب: " + main +
+    (canShowTreatment() ? "\nالعلاج: راجع القبضة والتنفس" : "");
 }
 
-/* ===== Pro ===== */
+/* ===== Pro UI ===== */
 
 function openProModal() {
   document.getElementById("proModal").classList.remove("hidden");
@@ -88,9 +87,11 @@ function closeProModal() {
   document.getElementById("proModal").classList.add("hidden");
 }
 
-function submitLicenseCode() {
+function submitLicense() {
   const code = document.getElementById("licenseInput").value;
-  if (activateProLicense(code)) {
+  const days = parseInt(document.getElementById("planSelect").value);
+
+  if (activateLicense(code, days)) {
     alert("تم التفعيل");
     location.reload();
   } else {
