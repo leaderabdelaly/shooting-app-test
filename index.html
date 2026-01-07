@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <title>Shehaby Shooting Pro</title>
@@ -12,32 +12,61 @@
 <body>
 
 <header>
-  <h1 id="appTitle">Shehaby Shooting Pro</h1>
-  <button id="langBtn">EN</button>
+  <h1>Shehaby Shooting Pro</h1>
+
+  <div class="top-controls">
+    <button id="langToggle">EN</button>
+    <button onclick="openProModal()">⭐ النسخة الاحترافية</button>
+  </div>
 </header>
 
-<section class="upload">
-  <input type="file" id="targetInput" accept="image/*">
-</section>
+<main>
 
-<section id="targetContainer">
-  <img id="targetImg">
-</section>
+  <section class="upload">
+    <input type="file" id="imageInput" accept="image/*">
+  </section>
 
-<section class="controls">
-  <button id="setCenterBtn">تحديد مركز الهدف</button>
-  <button id="analyzeBtn">بدء تحليل الأخطاء</button>
-</section>
+  <canvas id="targetCanvas"></canvas>
 
-<section id="result"></section>
+  <section class="controls">
+    <button onclick="setCenterMode()">تحديد مركز الهدف</button>
+    <button onclick="shotMode()">توقيع الطلقات</button>
+    <button onclick="analyzeShots()">بدء تحليل الأخطاء</button>
+  </section>
 
-<section id="licenseBox">
-  <p id="licenseStatus"></p>
-  <input type="text" id="licenseInput" placeholder="كود التفعيل">
-  <button id="activateBtn">تفعيل النسخة الاحترافية</button>
-</section>
+  <section id="result"></section>
 
-<script src="lang.json" type="application/json"></script>
+</main>
+
+<!-- ===== Pro Modal ===== -->
+<div id="proModal" class="pro-modal hidden">
+  <div class="pro-box">
+    <h2>🔒 النسخة الاحترافية</h2>
+
+    <p>
+      النسخة المجانية<br>
+      - 10 طلقات فقط<br>
+      - تحليل الخطأ بدون علاج
+    </p>
+
+    <p>
+      النسخة الاحترافية<br>
+      - عدد غير محدود<br>
+      - تحليل + علاج<br>
+      - حفظ الجلسات
+    </p>
+
+    <input id="licenseInput" placeholder="ادخل كود التفعيل">
+
+    <button onclick="submitLicenseCode()">تفعيل</button>
+    <button class="secondary" onclick="closeProModal()">إغلاق</button>
+
+    <p class="small">
+      <a id="whatsLink" target="_blank">طلب كود التفعيل عبر واتساب</a>
+    </p>
+  </div>
+</div>
+
 <script src="license.js"></script>
 <script src="app.js"></script>
 
