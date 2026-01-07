@@ -1,117 +1,106 @@
-const targetInput = document.getElementById("targetInput");
-const targetImg = document.getElementById("targetImg");
-const targetContainer = document.getElementById("targetContainer");
-const analyzeBtn = document.getElementById("analyzeBtn");
-const setCenterBtn = document.getElementById("setCenterBtn");
-const resultBox = document.getElementById("result");
-const langBtn = document.getElementById("langBtn");
-const licenseStatus = document.getElementById("licenseStatus");
-const activateBtn = document.getElementById("activateBtn");
-const licenseInput = document.getElementById("licenseInput");
+const canvas = document.getElementById("targetCanvas");
+const ctx = canvas.getContext("2d");
 
-let shots = [];
+let img = new Image();
 let center = null;
-let currentLang = "ar";
-let langData = {};
+let shots = [];
+let mode = null;
 
-fetch("lang.json").then(r => r.json()).then(d => {
-  langData = d;
-  applyLang();
-});
-
-function applyLang() {
-  document.getElementById("appTitle").innerText = langData[currentLang].title;
-  analyzeBtn.innerText = langData[currentLang].analyze;
-  setCenterBtn.innerText = langData[currentLang].setCenter;
-  activateBtn.innerText = langData[currentLang].activate;
-  licenseStatus.innerText = isProUser() ? langData[currentLang].pro : langData[currentLang].free;
-  langBtn.innerText = currentLang === "ar" ? "EN" : "AR";
-}
-
-langBtn.onclick = () => {
-  currentLang = currentLang === "ar" ? "en" : "ar";
-  applyLang();
+document.getElementById("imageInput").onchange = e => {
+  const file = e.target.files[0];
+  img.src = URL.createObjectURL(file);
 };
 
-targetInput.onchange = e => {
-  const f = e.target.files[0];
-  if (!f) return;
-  const r = new FileReader();
-  r.onload = () => {
-    targetImg.src = r.result;
-    resetAll();
-  };
-  r.readAsDataURL(f);
+img.onload = () => {
+  canvas.width = img.width;
+  canvas.height = img.height;
+  redraw();
 };
 
-function resetAll() {
-  shots = [];
-  center = null;
-  resultBox.innerHTML = "";
-  document.querySelectorAll(".shot,.center").forEach(e => e.remove());
-}
+function redraw() {
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(img,0,0);
 
-setCenterBtn.onclick = () => {
-  targetImg.onclick = e => {
-    const rect = targetImg.getBoundingClientRect();
-    center = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-    document.querySelectorAll(".center").forEach(e => e.remove());
-    drawDot(center.x, center.y, "center");
-    targetImg.onclick = addShot;
-  };
-};
-
-function addShot(e) {
-  if (!center) return;
-  if (!canAddShot(shots.length)) {
-    alert(langData[currentLang].free);
-    return;
+  if (center) {
+    ctx.fillStyle = "red";
+    ctx.beginPath();
+    ctx.arc(center.x, center.y, 6, 0, Math.PI*2);
+    ctx.fill();
   }
-  const rect = targetImg.getBoundingClientRect();
-  const p = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-  shots.push(p);
-  drawDot(p.x, p.y, "shot");
-}
 
-function drawDot(x, y, cls) {
-  const d = document.createElement("div");
-  d.className = cls;
-  d.style.left = x + "px";
-  d.style.top = y + "px";
-  targetContainer.appendChild(d);
-}
-
-analyzeBtn.onclick = () => {
-  if (!center || shots.length === 0) {
-    resultBox.innerText = langData[currentLang].noData;
-    return;
-  }
-  let dx = 0, dy = 0;
-  shots.forEach(s => {
-    dx += s.x - center.x;
-    dy += s.y - center.y;
+  shots.forEach((s,i)=>{
+    ctx.fillStyle = "blue";
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, 5, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillText(i+1, s.x+6, s.y);
   });
-  dx /= shots.length;
-  dy /= shots.length;
+}
 
-  let error = "OK";
-  if (dx > 15) error = "Right pressure";
-  if (dx < -15) error = "Left grip";
-  if (dy > 15) error = "Wrist down";
-  if (dy < -15) error = "Wrist up";
+canvas.onclick = e => {
+  const r = canvas.getBoundingClientRect();
+  const x = e.clientX - r.left;
+  const y = e.clientY - r.top;
 
-  resultBox.innerHTML = `
-    <p>Shots: ${shots.length}</p>
-    <p>Error: ${error}</p>
-    ${canShowTreatment() ? "<p>Treatment: Grip & trigger control</p>" : `<p>${langData[currentLang].upgrade}</p>`}
-  `;
-};
-
-activateBtn.onclick = () => {
-  if (activatePro(licenseInput.value.trim())) {
-    applyLang();
-    alert("Pro Activated");
-  } else {
-    alert("Invalid Key");
+  if (mode === "center") center = {x,y};
+  if (mode === "shot") {
+    if (!isPro && shots.length >= 10) {
+      alert("النسخة المجانية 10 طلقات فقط");
+      return;
+    }
+    shots.push({x,y});
   }
+  redraw();
 };
+
+function setCenterMode() { mode = "center"; }
+function shotMode() { mode = "shot"; }
+
+function analyzeShots() {
+  if (!center || shots.length === 0) return;
+
+  let result = {};
+  shots.forEach(s=>{
+    const dx = s.x - center.x;
+    const dy = s.y - center.y;
+    let key =
+      dy < -20 ? "أعلى" :
+      dy > 20 ? "أسفل" :
+      dx < -20 ? "يسار" :
+      dx > 20 ? "يمين" :
+      "مركز";
+    result[key] = (result[key]||0)+1;
+  });
+
+  let max = Object.keys(result).reduce((a,b)=>result[a]>result[b]?a:b);
+  document.getElementById("result").innerText =
+    "الخطأ الغالب: " + max +
+    (isPro ? "\nالعلاج: راجع قبضة السلاح والتنفس" : "");
+}
+
+/* ===== Pro ===== */
+
+function openProModal() {
+  document.getElementById("proModal").classList.remove("hidden");
+}
+
+function closeProModal() {
+  document.getElementById("proModal").classList.add("hidden");
+}
+
+function submitLicenseCode() {
+  const code = document.getElementById("licenseInput").value;
+  if (activateProLicense(code)) {
+    alert("تم التفعيل");
+    location.reload();
+  } else {
+    alert("كود غير صحيح");
+  }
+}
+
+document.addEventListener("DOMContentLoaded", ()=>{
+  const phone = "201067050007";
+  const msg = "طلب تفعيل النسخة الاحترافية\nShehaby Shooting Pro";
+  document.getElementById("whatsLink").href =
+    "https://wa.me/"+phone+"?text="+encodeURIComponent(msg);
+});
